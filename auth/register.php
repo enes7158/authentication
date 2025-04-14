@@ -1,6 +1,6 @@
 <?php
+global $pdo;
 require_once __DIR__ . '/../config.php';
-session_start();
 
 $errors = [];
 
@@ -43,14 +43,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = "Bu e-posta adresi zaten kullanılıyor";
         }
     }
-    
+
     if (empty($errors)) {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
         $stmt = $pdo->prepare("INSERT INTO users (username, email, password, created_at) VALUES (?, ?, ?, NOW())");
 
         if ($stmt->execute([$username, $email, $hashed_password])) {
-            $_SESSION['success_message'] = "Kayıt başarılı! Şimdi giriş yapabilirsiniz.";
+            setcookie('success_message' , "Kayıt başarılı! Şimdi giriş yapabilirsiniz." , time() + 300, '/');
             header("Location: login.php");
             exit;
         } else {

@@ -1,9 +1,8 @@
 <?php
 global $pdo;
 require_once __DIR__ . '/../config.php';
-session_start();
 
-if (isset($_SESSION['user_id'])) {
+if (isset($_COOKIE['user_id'])) {
     header("Location: dashboard.php");
     exit;
 }
@@ -28,8 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
+            setcookie('user_id', $user['id'], 0 ,"/");
+            setcookie('username', $user['username'], 0 ,"/");
 
             header("Location: dashboard.php");
             exit;
