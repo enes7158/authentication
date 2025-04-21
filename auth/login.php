@@ -1,13 +1,16 @@
 <?php
 global $pdo;
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../utils/cookie_utils.php';
 
-if (isset($_COOKIE['user_id'])) {
+$user_id = getSecureCookie('user_id');
+if ($user_id) {
     header("Location: dashboard.php");
     exit;
 }
 
 $errors = [];
+$success_message = getSecureCookie('success_message');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
@@ -27,8 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($password, $user['password'])) {
-            setcookie('user_id', $user['id'], 0 ,"/");
-            setcookie('username', $user['username'], 0 ,"/");
+            setSecureCookie('user_id', $user['id'], time() + 86400 * 30, '/');
+            setSecureCookie('username', $user['username'], time() + 86400 * 30, '/');
 
             header("Location: dashboard.php");
             exit;
@@ -59,14 +62,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     <?php endif; ?>
 
-    <?php if (isset($_SESSION['success_message'])): ?>
+    <?php if ($success_message): ?>
         <div class="success-message">
-            <p><?php echo $_SESSION['success_message']; ?></p>
+            <p><?php echo htmlspecialchars($success_message); ?></p>
         </div>
-        <?php unset($_SESSION['success_message']); ?>
+        <?php deleteSecureCookie('success_message', '/'); ?>
     <?php endif; ?>
 
-    <form action="login.php" method="post">
+    <form action="/auth/login.php" method="post">
         <div class="form-group">
             <label for="username">Kullanıcı Adı:</label>
             <input type="text" name="username" id="username" value="<?php echo htmlspecialchars($username ?? ''); ?>">
@@ -81,7 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" class="btn">Giriş Yap</button>
         </div>
 
-        <p>Hesabınız yok mu? <a href="register.php">Kayıt Ol</a></p>
+        <p>Hesabınız yok mu? <a href="/auth/register.php">Kayıt Ol</a></p>
+        <p>Şifrenizi mi unuttunuz? <a href="/auth/forgot_password.php">Şifremi Unuttum</a></p>
     </form>
 </div>
 </body>

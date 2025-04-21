@@ -1,15 +1,24 @@
 <?php
 global $pdo;
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../utils/cookie_utils.php';
 
-if (!isset($_COOKIE['user_id'])) {
+$user_id = getSecureCookie('user_id');
+if (!$user_id) {
     header("Location: login.php");
     exit;
 }
 
 $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
-$stmt->execute([$_COOKIE['user_id']]);
+$stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$user) {
+    deleteSecureCookie('user_id');
+    deleteSecureCookie('username');
+    header("Location: login.php");
+    exit;
+}
 ?>
 
 <!DOCTYPE html>

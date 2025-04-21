@@ -1,6 +1,7 @@
 <?php
 global $pdo;
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../utils/cookie_utils.php';
 
 $errors = [];
 
@@ -50,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("INSERT INTO users (username, email, password, created_at) VALUES (?, ?, ?, NOW())");
 
         if ($stmt->execute([$username, $email, $hashed_password])) {
-            setcookie('success_message' , "Kayıt başarılı! Şimdi giriş yapabilirsiniz." , time() + 300, '/');
+            setSecureCookie('success_message' , 'Kayıt başarılı! Şimdi giriş yapabilirsiniz' , time() + 300);
             header("Location: login.php");
             exit;
         } else {
